@@ -39,7 +39,7 @@ foreach (var file in di.GetFiles("*.html")){
     sw.Close();
     sr.Close();
 
-    //Filrar palabras y ordenar alfabeticamente
+    //Filrar palabras y ordenar alfabeticamente en archivo propio
     String direcL = @"C:\CS13309\FilesLetras\" + file.Name;
     sr = new FileStream(direcO, FileMode.Open);
     fs = File.Create(direcL); fs.Close();
