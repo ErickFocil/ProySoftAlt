@@ -8,12 +8,13 @@ Stopwatch swCrear = new Stopwatch();
 double tCrear = 0;
 
 //Log
-String logD = @"C:\CS13309\a3_2703119.txt";
+String logD = @"C:\CS13309\a4_2703119.txt";
 FileStream log = File.Create(logD);
 log.Close();
 StreamWriter swLog = new StreamWriter(logD);
 
 DirectoryInfo di = new DirectoryInfo(@"C:\CS13309\Files");
+List<String> palabras = new List<String>();
 foreach (var file in di.GetFiles("*.html")){
     swArchivo.Start();
     //Directorios
@@ -42,10 +43,6 @@ foreach (var file in di.GetFiles("*.html")){
     //Filrar palabras y ordenar alfabeticamente en archivo propio
     String direcL = @"C:\CS13309\FilesLetras\" + file.Name;
     sr = new FileStream(direcO, FileMode.Open);
-    fs = File.Create(direcL); fs.Close();
-    sw = new StreamWriter(direcL);
-
-    List<String> palabras = new List<String>();
 
     char cA = ' ';
     String palabra = "";
@@ -63,13 +60,6 @@ foreach (var file in di.GetFiles("*.html")){
     }
     sr.Close();
 
-    palabras.Sort((x,y) => String.Compare(x,y));
-
-    foreach(String p in palabras){
-        sw.WriteLine(p);
-    }
-    sw.Close();
-
     //Terminar contador
     swArchivo.Stop();
     TimeSpan swArchivoE = swArchivo.Elapsed;
@@ -79,6 +69,17 @@ foreach (var file in di.GetFiles("*.html")){
     swLog.WriteLine(logimprimir);
     swArchivo.Reset();
 }
+
+//Crear Biblioteca con todas las palabras, ordenadas y en minusculas
+FileStream fsB = File.Create(@"C:\CS13309\Biblioteca.txt"); fsB.Close();
+StreamWriter swB = new StreamWriter(@"C:\CS13309\Biblioteca.txt");
+palabras.Sort((x, y) => String.Compare(x, y));
+
+foreach (String p in palabras){
+    swB.WriteLine(p.ToLower());
+}
+swB.Close();
+
 
 swTodo.Stop();
 TimeSpan swTodoE = swTodo.Elapsed;
