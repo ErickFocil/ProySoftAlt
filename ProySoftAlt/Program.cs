@@ -7,8 +7,8 @@ namespace ProySoftAlt{
             Stopwatch swTodo = new Stopwatch();
             Stopwatch swArchivo = new Stopwatch();
             Stopwatch swCrear = new Stopwatch();
-            double tCrear = 0;
             swTodo.Start();
+
             //Log
             String logD = @"C:\CS13309\a4_2703119.txt";
             FileStream log = File.Create(logD);
@@ -70,13 +70,13 @@ namespace ProySoftAlt{
                 swArchivo.Stop();
                 TimeSpan swArchivoE = swArchivo.Elapsed;
                 String logimprimir = file.FullName + " -> " + swArchivoE.TotalSeconds;
-                tCrear += swArchivoE.TotalSeconds;
                 Console.WriteLine(logimprimir);
                 swLog.WriteLine(logimprimir);
                 swArchivo.Reset();
             }
 
             //Crear Biblioteca con todas las palabras, ordenadas y en minusculas
+            swCrear.Start();
             FileStream fsB = File.Create(@"C:\CS13309\Biblioteca.txt"); fsB.Close();
             StreamWriter swB = new StreamWriter(@"C:\CS13309\Biblioteca.txt");
             palabras.Sort((x, y) => String.Compare(x, y));
@@ -86,11 +86,14 @@ namespace ProySoftAlt{
                 swB.WriteLine(p.ToLower());
             }
             swB.Close();
+            double tBCrear = swCrear.Elapsed.TotalSeconds;
+            swCrear.Stop();
+
 
 
             swTodo.Stop();
             TimeSpan swTodoE = swTodo.Elapsed;
-            String mCrear = "Tiempo total de creación: " + tCrear;
+            String mCrear = "Tiempo total de creación de biblioteca: " + tBCrear;
             String mTodo = "Tiempo total de ejecución: " + swTodoE.TotalSeconds;
             swLog.WriteLine(mCrear);
             swLog.WriteLine(mTodo);
