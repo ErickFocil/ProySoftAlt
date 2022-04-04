@@ -10,7 +10,7 @@ namespace ProySoftAlt{
             swTodo.Start();
 
             //Log
-            String logD = @"C:\CS13309\a6_2703119.txt";
+            String logD = @"C:\CS13309\a7_2703119.txt";
             FileStream log = File.Create(logD);
             log.Close();
             StreamWriter swLog = new StreamWriter(logD);
@@ -52,7 +52,7 @@ namespace ProySoftAlt{
                 //CrearTokens(@"C:\CS13309\FilesLetras\", @"C:\CS13309\Tokens\", t);
             }
 
-            UnificarTokens(@"C:\CS13309\Tokens\", @"C:\CS13309\", "Tokens.txt");
+            UnificarTokens(@"C:\CS13309\Tokens\", @"C:\CS13309\", "Tokens.txt", "Posting.txt");
 
             swCrear.Stop();
             double tBCrear = swCrear.Elapsed.TotalSeconds;
@@ -62,9 +62,9 @@ namespace ProySoftAlt{
             TimeSpan swTodoE = swTodo.Elapsed;
             string mCrear = "Tiempo total de creación de todos los Tokens: " + tBCrear;
             string mTodo = "Tiempo total de ejecución: " + swTodoE.TotalSeconds;
-            swLog.WriteLine(mCrear);
+            //swLog.WriteLine(mCrear);
             swLog.WriteLine(mTodo);
-            Console.WriteLine(mCrear);
+            //Console.WriteLine(mCrear);
             Console.WriteLine(mTodo);
             swLog.Close();
         }
@@ -167,7 +167,7 @@ namespace ProySoftAlt{
             sw.Close();
         }
 
-        static void UnificarTokens(string dirO, string dirN, string fileName)
+        static void UnificarTokens(string dirO, string dirN, string fileName, string fnPosting)
         {
             List<NumRPalabras> palabras = new List<NumRPalabras>();
             DirectoryInfo di = new DirectoryInfo(dirO);
@@ -179,7 +179,7 @@ namespace ProySoftAlt{
                 while ((line = sr.ReadLine()) != null)
                 {
                     string[] split = line.Split(" ");
-                    palabras.Add(new NumRPalabras(split[0], Int32.Parse(split[1])));
+                    palabras.Add(new NumRPalabras(split[0], Int32.Parse(split[1])) { archivo = fi.Name});
                 }
                 sr.Close();
             }
@@ -195,27 +195,37 @@ namespace ProySoftAlt{
             
             // Crear archivo
             string direcTN = dirN + fileName;
+            string direcTNP = dirN + fnPosting;
             FileStream fs = File.Create(direcTN); fs.Close();
+            fs = File.Create(direcTNP); fs.Close();
             StreamWriter sw = new StreamWriter(direcTN);
+            StreamWriter swP = new StreamWriter(direcTNP);
 
             string prev = "";
-            int c = 1, acum = 0;
+            int c = 1, acum = 0, cont = 0, contI = 0;
             foreach (NumRPalabras p in palabras)
             {
+                swP.WriteLine(p.archivo + ";" + p.id);
+
                 if (prev.Equals("")) {
+                    contI = 0;
                     prev = p.p;
                     acum = p.id;
                 } else if (p.p.Equals(prev)) {
                     c++;
                     acum += p.id;
                 } else {
-                    sw.WriteLine(prev + ";" + acum + ";" + c);
+                    sw.WriteLine(prev + ";" + c + ";" + contI);
+                    contI = cont;
                     c = 1;
                     acum = p.id;
                     prev = p.p;
                 }
+
+                cont++;
             }
-            sw.Write(prev + ";" + acum + ";" + c);  //Ultimo archivo
+            sw.Write(prev + ";" + c + ";" + cont);  //Ultimo archivo
+            swP.Close();
             sw.Close();
         }
         
