@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using System.Diagnostics;
+using System.Collections;
 
 namespace ProySoftAlt{
     internal class program {
@@ -10,7 +11,7 @@ namespace ProySoftAlt{
             swTodo.Start();
 
             //Log
-            String logD = @"C:\CS13309\a7_2703119.txt";
+            String logD = @"C:\CS13309\a8_2703119.txt";
             FileStream log = File.Create(logD);
             log.Close();
             StreamWriter swLog = new StreamWriter(logD);
@@ -201,6 +202,8 @@ namespace ProySoftAlt{
             StreamWriter sw = new StreamWriter(direcTN);
             StreamWriter swP = new StreamWriter(direcTNP);
 
+            Hashtable htPosting = new Hashtable();
+
             string prev = "";
             int c = 1, acum = 0, cont = 0, contI = 0;
             foreach (NumRPalabras p in palabras)
@@ -215,6 +218,7 @@ namespace ProySoftAlt{
                     c++;
                     acum += p.id;
                 } else {
+                    htPosting.Add(prev,c + ";" + contI );// SOlo funciona de concepto, no hace nada en el programa
                     sw.WriteLine(prev + ";" + c + ";" + contI);
                     contI = cont;
                     c = 1;
@@ -224,8 +228,15 @@ namespace ProySoftAlt{
 
                 cont++;
             }
+            htPosting.Add(prev, new { doc = c, pos = contI }); // SOlo funciona de concepto, no se hace nada más
             sw.Write(prev + ";" + c + ";" + cont);  //Ultimo archivo
             swP.Close();
+            /* // Impresión del Hasttable, no usar, no cumple con lo requerido
+            foreach(string key in htPosting.Keys)
+            {
+                sw.WriteLine(key + ";" + htPosting[key]);
+            }
+            */
             sw.Close();
         }
         
