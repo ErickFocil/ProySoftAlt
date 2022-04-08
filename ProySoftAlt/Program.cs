@@ -11,7 +11,7 @@ namespace ProySoftAlt{
             swTodo.Start();
 
             //Log
-            String logD = @"C:\CS13309\a9_2703119.txt";
+            String logD = @"C:\CS13309\a10_2703119.txt";
             FileStream log = File.Create(logD);
             log.Close();
             StreamWriter swLog = new StreamWriter(logD);
@@ -57,7 +57,6 @@ namespace ProySoftAlt{
 
             swCrear.Stop();
             double tBCrear = swCrear.Elapsed.TotalSeconds;
-
 
             swTodo.Stop();
             TimeSpan swTodoE = swTodo.Elapsed;
@@ -211,7 +210,7 @@ namespace ProySoftAlt{
             int c = 1, acum = 0, cont = 0, contI = 0;
             foreach (NumRPalabras p in palabras)
             {
-                swP.WriteLine(p.archivo + ";" + p.id);
+                //swP.WriteLine(p.archivo + ";" + p.id);
                 /** Codigo funcional con List en vez del Hash
                 if (prev.Equals(""))
                 {
@@ -242,6 +241,7 @@ namespace ProySoftAlt{
             // Va conjunto al del código funcional de List en vez del Hash
             //sw.Write(prev + ";" + c + ";" + cont);  //Ultimo archivo
 
+            // Llenar archivo Diccionario de Tokens
             // El Hashtable necesita ser pasado a un List por los objetos
             List<NumRPalabras> dicT = new List<NumRPalabras>();
             foreach(string d in htDic.Keys)
@@ -249,9 +249,17 @@ namespace ProySoftAlt{
 
             dicT.Sort((x, y) => x.p.CompareTo(y.p));
             foreach(NumRPalabras d in dicT) sw.WriteLine(d.p + ";" + d.id + ";" + d.c);
-
-            swP.Close();
             sw.Close();
+
+            // Llenar archivo de Posting
+            List<NumRPalabras> listP = new List<NumRPalabras>();
+            foreach(int p in htPosting.Keys)
+                listP.Add((NumRPalabras)htPosting[p]);
+
+            foreach (NumRPalabras d in palabras)
+                swP.WriteLine(d.archivo + ";" + tfidf(d.id, ((NumRPalabras)htDic[d.p]).id).ToString("N4"));
+                //swP.WriteLine(d.archivo + ";" + d.id);
+            swP.Close();
         }
 
         static List<NumRPalabras> Filtrar(List<NumRPalabras> palabras, string stoplist)
@@ -320,6 +328,13 @@ namespace ProySoftAlt{
             //palabrasT = new List<NumRPalabras>();
 
             return palabras;
+        }
+
+        static double tfidf(int rep, int total)
+        {
+            double res = 0.0000;
+            res = ((double)rep * 100) / (double)total;
+            return res;
         }
         
     }
