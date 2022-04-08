@@ -11,7 +11,7 @@ namespace ProySoftAlt{
             swTodo.Start();
 
             //Log
-            String logD = @"C:\CS13309\a8_2703119.txt";
+            String logD = @"C:\CS13309\a9_2703119.txt";
             FileStream log = File.Create(logD);
             log.Close();
             StreamWriter swLog = new StreamWriter(logD);
@@ -53,7 +53,7 @@ namespace ProySoftAlt{
                 //CrearTokens(@"C:\CS13309\FilesLetras\", @"C:\CS13309\Tokens\", t);
             }
 
-            UnificarTokens(@"C:\CS13309\Tokens\", @"C:\CS13309\", "Tokens.txt", "Posting.txt");
+            UnificarTokens(@"C:\CS13309\Tokens\", @"C:\CS13309\", "Tokens.txt", "Posting.txt", @"C:\CS13309\stoplist.txt");
 
             swCrear.Stop();
             double tBCrear = swCrear.Elapsed.TotalSeconds;
@@ -61,7 +61,7 @@ namespace ProySoftAlt{
 
             swTodo.Stop();
             TimeSpan swTodoE = swTodo.Elapsed;
-            string mCrear = "Tiempo total de creación de todos los Tokens: " + tBCrear;
+            string mCrear = "Tiempo total de Filtrado: " + tBCrear;
             string mTodo = "Tiempo total de ejecución: " + swTodoE.TotalSeconds;
             //swLog.WriteLine(mCrear);
             swLog.WriteLine(mTodo);
@@ -163,12 +163,13 @@ namespace ProySoftAlt{
 
             foreach (var p in palabrasO)
             {
+                
                 sw.WriteLine(p.Palabra + " " + p.Cantidad);
             }
             sw.Close();
         }
 
-        static void UnificarTokens(string dirO, string dirN, string fileName, string fnPosting)
+        static void UnificarTokens(string dirO, string dirN, string fnToken, string fnPosting, string stoplist)
         {
             List<NumRPalabras> palabras = new List<NumRPalabras>();
             DirectoryInfo di = new DirectoryInfo(dirO);
@@ -190,12 +191,13 @@ namespace ProySoftAlt{
               .Select(y => new { Palabra = y.Key, sum = y.Count() })
               .ToList();
 
-            palabras.Sort((x,y) => x.p.CompareTo(y.p));
+            //palabras.Sort((x,y) => x.p.CompareTo(y.p));
 
-
+            // Ejecutar filtros
+            palabras = Filtrar(palabras,stoplist);
             
             // Crear archivo
-            string direcTN = dirN + fileName;
+            string direcTN = dirN + fnToken;
             string direcTNP = dirN + fnPosting;
             FileStream fs = File.Create(direcTN); fs.Close();
             fs = File.Create(direcTNP); fs.Close();
@@ -203,53 +205,130 @@ namespace ProySoftAlt{
             StreamWriter swP = new StreamWriter(direcTNP);
 
             Hashtable htPosting = new Hashtable();
+            Hashtable htDic = new Hashtable();
 
             string prev = "";
             int c = 1, acum = 0, cont = 0, contI = 0;
             foreach (NumRPalabras p in palabras)
             {
                 swP.WriteLine(p.archivo + ";" + p.id);
-
-                if (prev.Equals("")) {
+                /** Codigo funcional con List en vez del Hash
+                if (prev.Equals(""))
+                {
                     contI = 0;
                     prev = p.p;
                     acum = p.id;
-                } else if (p.p.Equals(prev)) {
+                }
+                else if (p.p.Equals(prev))
+                {
                     c++;
                     acum += p.id;
-                } else {
-                    htPosting.Add(prev,c + ";" + contI );// SOlo funciona de concepto, no hace nada en el programa
+                }
+                else
+                {
                     sw.WriteLine(prev + ";" + c + ";" + contI);
                     contI = cont;
                     c = 1;
                     acum = p.id;
                     prev = p.p;
                 }
+                **/
+                htPosting.Add(cont, p);
+                if (htDic.ContainsKey(p.p)) ((NumRPalabras)htDic[p.p]).id++;
+                else htDic.Add(p.p, new NumRPalabras(p.p, 1) { c = cont});
 
                 cont++;
             }
-            htPosting.Add(prev, new { doc = c, pos = contI }); // SOlo funciona de concepto, no se hace nada más
-            sw.Write(prev + ";" + c + ";" + cont);  //Ultimo archivo
+            // Va conjunto al del código funcional de List en vez del Hash
+            //sw.Write(prev + ";" + c + ";" + cont);  //Ultimo archivo
+
+            // El Hashtable necesita ser pasado a un List por los objetos
+            List<NumRPalabras> dicT = new List<NumRPalabras>();
+            foreach(string d in htDic.Keys)
+                dicT.Add(new NumRPalabras(d, ((NumRPalabras)htDic[d]).id) { c = ((NumRPalabras)htDic[d]).c });
+
+            dicT.Sort((x, y) => x.p.CompareTo(y.p));
+            foreach(NumRPalabras d in dicT) sw.WriteLine(d.p + ";" + d.id + ";" + d.c);
+
             swP.Close();
-            /* // Impresión del Hasttable, no usar, no cumple con lo requerido
-            foreach(string key in htPosting.Keys)
-            {
-                sw.WriteLine(key + ";" + htPosting[key]);
-            }
-            */
             sw.Close();
         }
-        
-        static void OrdenarTokensR(List<NumRPalabras> palabras, string dir, string fileName)
+
+        static List<NumRPalabras> Filtrar(List<NumRPalabras> palabras, string stoplist)
         {
-            //var temp = palabras.ToList(p);
+            // Ordeno las palabras
+            palabras.Sort((x, y) => x.p.CompareTo(y.p));
+            
+            // Inicializar las palabras a omitir
+            StreamReader srSL = new StreamReader(stoplist);
+            List<string> palabrasSL = new List<string>();
+            var line = "";
+            while ((line = srSL.ReadLine()) != null) palabrasSL.Add((String)line);
+            srSL.Close();
+            //foreach(string p in palabrasSL) Console.WriteLine("<" + p + ">");
+
+            List<NumRPalabras> palabrasT = new List<NumRPalabras>();
+
+            // Fitlrar palabras de un solo caracter
+            foreach (NumRPalabras p in palabras)
+                if (p.p.Length > 1) palabrasT.Add(p);
+
+            // Asigno la lista temporal al principal y reseteo la lista temporal
+            palabras = palabrasT;
+            palabrasT = new List<NumRPalabras>();
+
+            // Filtrar por palabras a excluir
+            foreach (NumRPalabras p in palabras)
+            {
+                bool filtrar = false;
+                foreach (string ps in palabrasSL)
+                {
+                    if (p.p.Equals(ps))
+                    {
+                        filtrar = true;
+                        break;
+                    }
+                }
+                if (!filtrar) palabrasT.Add(p);
+            }
+            // Asigno la lista temporal al principal y reseteo la lista temporal
+            palabras = palabrasT;
+            palabrasT = new List<NumRPalabras>();
+
+            // Contar cantidad de repeticiones de cada palabra en todos los archivos
+            Hashtable htSum = new Hashtable();
+            int lim = 5;
+            foreach (NumRPalabras p in palabras)
+            {
+                if (htSum.ContainsKey(p.p)) htSum[p.p] = (int)htSum[p.p] + p.id;
+                else htSum.Add(p.p, p.id);
+            }
+            Hashtable htDrop = new Hashtable();
+            foreach (string k in htSum.Keys)
+                if((int)htSum[k] < lim) htDrop.Add(k, htSum[k]);
+
+            // Filtrar según las palabras seleccionadas
+            foreach (NumRPalabras p in palabras)
+            {
+                bool filtrar = false;
+                if(htDrop.ContainsKey(p.p)) filtrar = true;
+                if (!filtrar) palabrasT.Add(p);
+            }
+
+            // Asigno la lista temporal al principal y reseteo la lista temporal
+            palabras = palabrasT;
+            //palabrasT = new List<NumRPalabras>();
+
+            return palabras;
         }
+        
     }
 
     public class NumRPalabras
     {
         public string p;
         public int id;
+        public int c;
         public string archivo;
         public NumRPalabras(string p, int id) { this.p = p; this.id = id; }
     }
