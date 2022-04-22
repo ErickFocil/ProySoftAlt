@@ -7,11 +7,10 @@ namespace ProySoftAlt{
         static void Main(string[] args) {
             Stopwatch swTodo = new Stopwatch();
             Stopwatch swArchivo = new Stopwatch();
-            Stopwatch swCrear = new Stopwatch();
             swTodo.Start();
 
             //Log
-            String logD = @"C:\CS13309\a10_2703119.txt";
+            String logD = @"C:\CS13309\aE_2703119.txt";
             FileStream log = File.Create(logD);
             log.Close();
             StreamWriter swLog = new StreamWriter(logD);
@@ -39,33 +38,41 @@ namespace ProySoftAlt{
             
             /** Trabajando solo con 4 elementos **/
             // Tokenizar
-            swCrear.Start();
-            //List<string> palabras = new List<string>();
-            string[] vs = new string[] {
-                "simple.html",
-                "medium.html",
-                "hard.html",
-                "049.html"};
-            // Loop que iría en el loop principal
-            foreach (String t in vs)
-            {
-                // Comentar cuando se prueben con todos los archivos
-                //CrearTokens(@"C:\CS13309\FilesLetras\", @"C:\CS13309\Tokens\", t);
-            }
+            // Usando solo éste paso se omite los siguientes
+            // UnificarTokens(@"C:\CS13309\Tokens\", @"C:\CS13309\", "Tokens.txt", "Posting.txt", @"C:\CS13309\stoplist.txt");
 
-            UnificarTokens(@"C:\CS13309\Tokens\", @"C:\CS13309\", "Tokens.txt", "Posting.txt", @"C:\CS13309\stoplist.txt");
+            // Juntar Tokens
+            List<NumRPalabras> palabrasDic = UnificarTokens(@"C:\CS13309\Tokens\");
 
-            swCrear.Stop();
-            double tBCrear = swCrear.Elapsed.TotalSeconds;
+            //Ordenar - en desuso ya que en filtros se ordena
+            //palabras.Sort((x,y) => x.p.CompareTo(y.p));
+
+            // Ejecutar filtros
+            palabrasDic = Filtrar(palabrasDic, @"C:\CS13309\stoplist.txt");
+
+            // Archivo para contador
+            TimeSpan[] tSCArchivos = new TimeSpan[2];
+
+            // Crear Archivos
+            Hashtable htDic = CrearHTDic(palabrasDic);
+            swArchivo.Start();
+            CrearArchivoTokens(palabrasDic, htDic, @"C:\CS13309\", "Tokens.txt");
+            swArchivo.Stop();
+            tSCArchivos[0] = swArchivo.Elapsed;
+
+            swArchivo.Reset(); swArchivo.Start();
+            CrearArchivoPosting(palabrasDic, htDic, @"C:\CS13309\", "Posting.txt");
+            swArchivo.Stop();
+            tSCArchivos[1] = swArchivo.Elapsed;
+
 
             swTodo.Stop();
             TimeSpan swTodoE = swTodo.Elapsed;
-            string mCrear = "Tiempo total de Filtrado: " + tBCrear;
-            string mTodo = "Tiempo total de ejecución: " + swTodoE.TotalSeconds;
-            //swLog.WriteLine(mCrear);
-            swLog.WriteLine(mTodo);
-            //Console.WriteLine(mCrear);
-            Console.WriteLine(mTodo);
+            string mTodo = "Tiempo de creación de Token: " + tSCArchivos[0].TotalSeconds + "\n" +
+                "Tiempo de creación de Posting: " + tSCArchivos[1].TotalSeconds + "\n" +
+                "Tiempo total de ejecución: " + swTodoE.TotalSeconds;
+            swLog.Write(mTodo);
+            Console.Write(mTodo);
             swLog.Close();
         }
 
@@ -168,7 +175,9 @@ namespace ProySoftAlt{
             sw.Close();
         }
 
-        static void UnificarTokens(string dirO, string dirN, string fnToken, string fnPosting, string stoplist)
+        // En Desuso
+        /**
+        static void UnificarTokensO(string dirO, string dirN, string fnToken, string fnPosting, string stoplist)
         {
             List<NumRPalabras> palabras = new List<NumRPalabras>();
             DirectoryInfo di = new DirectoryInfo(dirO);
@@ -184,11 +193,6 @@ namespace ProySoftAlt{
                 }
                 sr.Close();
             }
-
-            var unido = palabras.GroupBy(x => x.p)
-              .Where(g => g.Count() > 0)
-              .Select(y => new { Palabra = y.Key, sum = y.Count() })
-              .ToList();
 
             //palabras.Sort((x,y) => x.p.CompareTo(y.p));
 
@@ -211,27 +215,27 @@ namespace ProySoftAlt{
             foreach (NumRPalabras p in palabras)
             {
                 //swP.WriteLine(p.archivo + ";" + p.id);
-                /** Codigo funcional con List en vez del Hash
-                if (prev.Equals(""))
-                {
-                    contI = 0;
-                    prev = p.p;
-                    acum = p.id;
-                }
-                else if (p.p.Equals(prev))
-                {
-                    c++;
-                    acum += p.id;
-                }
-                else
-                {
-                    sw.WriteLine(prev + ";" + c + ";" + contI);
-                    contI = cont;
-                    c = 1;
-                    acum = p.id;
-                    prev = p.p;
-                }
-                **/
+                // Codigo funcional con List en vez del Hash
+                //if (prev.Equals(""))
+                //{
+                //    contI = 0;
+                //    prev = p.p;
+                //    acum = p.id;
+                //}
+                //else if (p.p.Equals(prev))
+                //{
+                //    c++;
+                //    acum += p.id;
+                //}
+                //else
+                //{
+                //    sw.WriteLine(prev + ";" + c + ";" + contI);
+                //    contI = cont;
+                //    c = 1;
+                //    acum = p.id;
+                //    prev = p.p;
+                //}
+                //
                 htPosting.Add(cont, p);
                 if (htDic.ContainsKey(p.p)) ((NumRPalabras)htDic[p.p]).id++;
                 else htDic.Add(p.p, new NumRPalabras(p.p, 1) { c = cont});
@@ -259,6 +263,118 @@ namespace ProySoftAlt{
             foreach (NumRPalabras d in palabras)
                 swP.WriteLine(d.archivo + ";" + tfidf(d.id, ((NumRPalabras)htDic[d.p]).id).ToString("N4"));
                 //swP.WriteLine(d.archivo + ";" + d.id);
+            swP.Close();
+        }
+        **/
+        static List<NumRPalabras> UnificarTokens(string dirO)
+        {
+            List<NumRPalabras> palabras = new List<NumRPalabras>();
+            DirectoryInfo di = new DirectoryInfo(dirO);
+
+            foreach (FileInfo fi in di.GetFiles("*.html"))
+            {
+                StreamReader sr = new StreamReader(fi.FullName);
+                string? line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    string[] split = line.Split(" ");
+                    palabras.Add(new NumRPalabras(split[0], Int32.Parse(split[1])) { archivo = fi.Name });
+                }
+                sr.Close();
+            }
+            return palabras;
+        }
+        
+        // En Desuso
+        /**
+        static void CrearArchivos(List<NumRPalabras> palabras, string dirN, string fnToken, string fnPosting)
+        {
+            // Crear archivo
+            string direcTN = dirN + fnToken;
+            string direcTNP = dirN + fnPosting;
+            FileStream fs = File.Create(direcTN); fs.Close();
+            fs = File.Create(direcTNP); fs.Close();
+            StreamWriter sw = new StreamWriter(direcTN);
+            StreamWriter swP = new StreamWriter(direcTNP);
+
+            Hashtable htPosting = new Hashtable();
+            Hashtable htDic = new Hashtable();
+
+            int cont = 0;
+            foreach (NumRPalabras p in palabras)
+            {
+                htPosting.Add(cont, p);
+                if (htDic.ContainsKey(p.p)) ((NumRPalabras)htDic[p.p]).id++;
+                else htDic.Add(p.p, new NumRPalabras(p.p, 1) { c = cont });
+
+                cont++;
+            }
+
+            // Llenar archivo Diccionario de Tokens
+            // El Hashtable necesita ser pasado a un List por los objetos
+            List<NumRPalabras> dicT = new List<NumRPalabras>();
+            foreach (string d in htDic.Keys)
+                dicT.Add(new NumRPalabras(d, ((NumRPalabras)htDic[d]).id) { c = ((NumRPalabras)htDic[d]).c });
+
+            dicT.Sort((x, y) => x.p.CompareTo(y.p));
+            foreach (NumRPalabras d in dicT) sw.WriteLine(d.p + ";" + d.id + ";" + d.c);
+            sw.Close();
+
+            // Llenar archivo de Posting
+            List<NumRPalabras> listP = new List<NumRPalabras>();
+            foreach (int p in htPosting.Keys)
+                listP.Add((NumRPalabras)htPosting[p]);
+
+            foreach (NumRPalabras d in palabras)
+                swP.WriteLine(d.archivo + ";" + tfidf(d.id, ((NumRPalabras)htDic[d.p]).id).ToString("N4"));
+            //swP.WriteLine(d.archivo + ";" + d.id);
+            swP.Close();
+        }
+        **/
+        static Hashtable CrearHTDic(List<NumRPalabras> palabras)
+        {
+            Hashtable htDic = new Hashtable();
+
+            int cont = 0;
+            foreach (NumRPalabras p in palabras)
+            {
+                if (htDic.ContainsKey(p.p)) ((NumRPalabras)htDic[p.p]).id++;
+                else htDic.Add(p.p, new NumRPalabras(p.p, 1) { c = cont });
+
+                cont++;
+            }
+
+            return htDic;
+        }
+
+        static void CrearArchivoTokens(List<NumRPalabras> palabras, Hashtable htDic, string dirN, string fnToken)
+        {
+            // Crear archivo
+            string direcTN = dirN + fnToken;
+            FileStream fs = File.Create(direcTN); fs.Close();
+            StreamWriter sw = new StreamWriter(direcTN);
+
+            // Llenar archivo Diccionario de Tokens
+            // El Hashtable necesita ser pasado a un List por los objetos
+            List<NumRPalabras> dicT = new List<NumRPalabras>();
+            foreach (string d in htDic.Keys)
+                dicT.Add(new NumRPalabras(d, ((NumRPalabras)htDic[d]).id) { c = ((NumRPalabras)htDic[d]).c });
+
+            dicT.Sort((x, y) => x.p.CompareTo(y.p));
+            foreach (NumRPalabras d in dicT) sw.WriteLine(d.p + ";" + d.id + ";" + d.c);
+            sw.Close();
+        }
+
+        static void CrearArchivoPosting(List<NumRPalabras> palabras, Hashtable htDic, string dirN, string fnPosting)
+        {
+            // Crear archivo
+            string direcTNP = dirN + fnPosting;
+            FileStream fs = File.Create(direcTNP); fs.Close();
+            StreamWriter swP = new StreamWriter(direcTNP);
+
+            foreach (NumRPalabras d in palabras)
+                swP.WriteLine(d.archivo + ";" + tfidf(d.id, ((NumRPalabras)htDic[d.p]).id).ToString("N4"));
+            //swP.WriteLine(d.archivo + ";" + d.id);
             swP.Close();
         }
 
