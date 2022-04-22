@@ -6,6 +6,13 @@ namespace ProySoftAlt{
     internal class program {
         static void Main(string[] args) {
 
+            string accion = "";
+            Hashtable argumentos = AnalizarArgs(args);
+            if (argumentos.ContainsKey("Error"))
+                Console.WriteLine("Error: " + argumentos["Error"]);
+            else
+                accion = argumentos["-o"].ToString();
+
             string[] directorios =
             {
                 @"C:\CS13309\FilesSinEtiquetas\",
@@ -19,10 +26,7 @@ namespace ProySoftAlt{
             swTodo.Start();
 
             //Log
-            String logD = @"C:\CS13309\aE_2703119.txt";
-            FileStream log = File.Create(logD);
-            log.Close();
-            StreamWriter swLog = new StreamWriter(logD);
+            string mTodo = "";
 
             DirectoryInfo di = new DirectoryInfo(@"C:\CS13309\Files");
 
@@ -41,7 +45,8 @@ namespace ProySoftAlt{
                 TimeSpan swArchivoE = swArchivo.Elapsed;
                 String logimprimir = file.FullName + " -> " + swArchivoE.TotalSeconds;
                 Console.WriteLine(logimprimir);
-                swLog.WriteLine(logimprimir);
+                mTodo += logimprimir + "\n";
+                //swLog.WriteLine(logimprimir);
                 swArchivo.Reset();
             }
 
@@ -58,7 +63,7 @@ namespace ProySoftAlt{
             //palabras.Sort((x,y) => x.p.CompareTo(y.p));
 
             // Ejecutar filtros
-            palabrasDic = Filtrar(palabrasDic, @"C:\CS13309\stoplist.txt");
+            palabrasDic = Filtrar(palabrasDic, @"C:\CS13309\StopList\stoplist.txt");
 
             // Archivo para contador
             TimeSpan[] tSCArchivos = new TimeSpan[2];
@@ -77,17 +82,71 @@ namespace ProySoftAlt{
 
             swTodo.Stop();
             TimeSpan swTodoE = swTodo.Elapsed;
-            string mTodo = "Milisegundos de creación de Token: " + tSCArchivos[0].TotalMilliseconds + "\n" +
+            mTodo += "Milisegundos de creación de Token: " + tSCArchivos[0].TotalMilliseconds + "\n" +
                 "Milisegundos de creación Tokens y de Posting: " + tSCArchivos[1].TotalMilliseconds + "\n" +
                 "Tiempo total de ejecución: " + swTodoE.TotalSeconds;
+            // Log End
+            String logD = @"C:\CS13309\aE_2703119.txt";
+            FileStream log = File.Create(logD); log.Close();
+            StreamWriter swLog = new StreamWriter(logD);
             swLog.Write(mTodo);
             Console.Write(mTodo);
             swLog.Close();
         }
 
-        static void AnalizarArgs(string[] args)
+        static Hashtable AnalizarArgs(string[] args)
         {
+            Hashtable htR = new Hashtable();
+            List<string> argsList = new List<string>();
 
+            {
+                htR.Add("-t", -1);  argsList.Add("-t");
+                htR.Add("-o", ">F<"); argsList.Add("-o");
+            }
+
+            // Análisis de los argumentos
+            // Se determina que sea par el número de argumentos
+            if (args.Length % 2 != 0)
+            {
+                htR.Add("Error", "Error en los argumentos");
+                return htR;
+            }
+            // Se determina si el argumento integrado es válido
+            for(int i = 0; i < args.Length; i+=2)
+            {
+                if(htR.ContainsKey(args[i]))
+                {
+                    switch (args[i])
+                    {
+                        case "-o":
+                            switch (args[i + 1])
+                            {
+                                case "tokenize":
+                                case "index":
+                                    htR["-o"] = args[i + 1];
+                                    break;
+                                default:
+                                    htR.Add("Error", "Error en el argumento -o, Petición Inválida");
+                                    return htR;
+                            }
+                            break;
+                        case "-t":
+                            object t = Int32.Parse(args[i + 1]);
+                            if (t is byte || t is ushort || t is uint || t is ulong)
+                                htR[args[i]] = Int32.Parse(args[i + 1]);
+                            break;
+                        default:
+                            htR.Add("Error", "Error en el argumento -t, Dato Inválido");
+                            return htR;
+                    }
+                }
+                else
+                {
+                    htR.Add("Error", "Error en los argumentos");
+                    return htR;
+                }
+            }
+            return htR;
         }
 
         static void LimpiarDirectorios(string[] dic)
