@@ -5,6 +5,15 @@ using System.Collections;
 namespace ProySoftAlt{
     internal class program {
         static void Main(string[] args) {
+
+            string[] directorios =
+            {
+                @"C:\CS13309\FilesSinEtiquetas\",
+                @"C:\CS13309\FilesLetras\",
+                @"C:\CS13309\Tokens\"
+            };
+            LimpiarDirectorios(directorios);
+
             Stopwatch swTodo = new Stopwatch();
             Stopwatch swArchivo = new Stopwatch();
             swTodo.Start();
@@ -35,13 +44,14 @@ namespace ProySoftAlt{
                 swLog.WriteLine(logimprimir);
                 swArchivo.Reset();
             }
-            
+
             /** Trabajando solo con 4 elementos **/
             // Tokenizar
             // Usando solo éste paso se omite los siguientes
             // UnificarTokens(@"C:\CS13309\Tokens\", @"C:\CS13309\", "Tokens.txt", "Posting.txt", @"C:\CS13309\stoplist.txt");
 
             // Juntar Tokens
+            swArchivo.Start();
             List<NumRPalabras> palabrasDic = UnificarTokens(@"C:\CS13309\Tokens\");
 
             //Ordenar - en desuso ya que en filtros se ordena
@@ -55,12 +65,11 @@ namespace ProySoftAlt{
 
             // Crear Archivos
             Hashtable htDic = CrearHTDic(palabrasDic);
-            swArchivo.Start();
             CrearArchivoTokens(palabrasDic, htDic, @"C:\CS13309\", "Tokens.txt");
             swArchivo.Stop();
             tSCArchivos[0] = swArchivo.Elapsed;
 
-            swArchivo.Reset(); swArchivo.Start();
+            swArchivo.Start();
             CrearArchivoPosting(palabrasDic, htDic, @"C:\CS13309\", "Posting.txt");
             swArchivo.Stop();
             tSCArchivos[1] = swArchivo.Elapsed;
@@ -68,12 +77,30 @@ namespace ProySoftAlt{
 
             swTodo.Stop();
             TimeSpan swTodoE = swTodo.Elapsed;
-            string mTodo = "Tiempo de creación de Token: " + tSCArchivos[0].TotalSeconds + "\n" +
-                "Tiempo de creación de Posting: " + tSCArchivos[1].TotalSeconds + "\n" +
+            string mTodo = "Milisegundos de creación de Token: " + tSCArchivos[0].TotalMilliseconds + "\n" +
+                "Milisegundos de creación Tokens y de Posting: " + tSCArchivos[1].TotalMilliseconds + "\n" +
                 "Tiempo total de ejecución: " + swTodoE.TotalSeconds;
             swLog.Write(mTodo);
             Console.Write(mTodo);
             swLog.Close();
+        }
+
+        static void AnalizarArgs(string[] args)
+        {
+
+        }
+
+        static void LimpiarDirectorios(string[] dic)
+        {
+            foreach (string d in dic)
+            {
+                DirectoryInfo di = new DirectoryInfo(d);
+
+                foreach (FileInfo file in di.GetFiles())
+                    file.Delete();
+                foreach (DirectoryInfo dir in di.GetDirectories())
+                    dir.Delete(true);
+            }
         }
 
         static void QuitarEtiquetas(string dirN, FileInfo file)
