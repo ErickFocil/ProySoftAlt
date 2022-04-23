@@ -13,11 +13,16 @@ namespace ProySoftAlt{
             else
                 accion = argumentos["-o"].ToString();
 
+            foreach (string arg in args) Console.Write(arg + " ");
+            Console.WriteLine(argumentos["-t"]);
+            Console.WriteLine(argumentos["-o"]);
+
             string[] directorios =
             {
                 @"C:\CS13309\FilesSinEtiquetas\",
                 @"C:\CS13309\FilesLetras\",
-                @"C:\CS13309\Tokens\"
+                @"C:\CS13309\Tokens\",
+                @"C:\CS13309\"
             };
             LimpiarDirectorios(directorios);
 
@@ -29,6 +34,16 @@ namespace ProySoftAlt{
             string mTodo = "";
 
             DirectoryInfo di = new DirectoryInfo(@"C:\CS13309\Files");
+
+            // Inicializar Limitador
+            bool limitar = false;
+            int limite = 0;
+            if((Int32)argumentos["-t"] != -1)
+            {
+                limitar = true;
+                limite = (Int32)argumentos["-t"];
+            }
+            int contL = 0;
 
             foreach (var file in di.GetFiles("*.html"))
             {
@@ -48,6 +63,13 @@ namespace ProySoftAlt{
                 mTodo += logimprimir + "\n";
                 //swLog.WriteLine(logimprimir);
                 swArchivo.Reset();
+
+                // Limitador
+                if (limitar)
+                {
+                    contL++;
+                    if (contL >= limite) break;
+                }
             }
 
             /** Trabajando solo con 4 elementos **/
@@ -131,12 +153,20 @@ namespace ProySoftAlt{
                             }
                             break;
                         case "-t":
-                            object t = Int32.Parse(args[i + 1]);
+                            Int32.TryParse(args[i + 1], out int val);
+                            if(val == 0)
+                            {
+                                htR.Add("Error", "Error en el argumento -t, Dato inválido");
+                                return htR;
+                            }
+                            htR[args[i]] = val;
+                            /*object t = Int32.Parse(args[i + 1]);
                             if (t is byte || t is ushort || t is uint || t is ulong)
                                 htR[args[i]] = Int32.Parse(args[i + 1]);
+                            */
                             break;
                         default:
-                            htR.Add("Error", "Error en el argumento -t, Dato Inválido");
+                            htR.Add("Error", "Error en los argumentos, Argumento Inválido");
                             return htR;
                     }
                 }
@@ -155,10 +185,8 @@ namespace ProySoftAlt{
             {
                 DirectoryInfo di = new DirectoryInfo(d);
 
-                foreach (FileInfo file in di.GetFiles())
-                    file.Delete();
-                foreach (DirectoryInfo dir in di.GetDirectories())
-                    dir.Delete(true);
+                foreach (FileInfo file in di.GetFiles()) file.Delete();
+                //foreach (DirectoryInfo dir in di.GetDirectories()) dir.Delete(true);
             }
         }
 
