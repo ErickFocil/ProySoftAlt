@@ -1,0 +1,47 @@
+{
+  "profiles": {
+    "ProySoftAlt": {
+      "commandName": "Project"
+    },
+    "Tokenize 10": {
+      "commandName": "Project",
+      "commandLineArgs": "-o tokenize -t 10"
+    },
+    "Tokenize 20": {
+      "commandName": "Project",
+      "commandLineArgs": "-o tokenize -t 20"
+    },
+    "Tokenize 30": {
+      "commandName": "Project",
+      "commandLineArgs": "-o tokenize -t 30"
+    },
+    "Tokenize 40": {
+      "commandName": "Project",
+      "commandLineArgs": "-o tokenize -t 40"
+    },
+    "Tokenize 50": {
+      "commandName": "Project",
+      "commandLineArgs": "-o tokenize -t 50"
+    },
+    "Index 10": {
+      "commandName": "Project",
+      "commandLineArgs": "-o tokenize -t 10"
+    },
+    "Index 20": {
+      "commandName": "Project",
+      "commandLineArgs": "-o tokenize -t 20"
+    },
+    "Index 30": {
+      "commandName": "Project",
+      "commandLineArgs": "-o tokenize -t 30"
+    },
+    "Index 40": {
+      "commandName": "Project",
+      "commandLineArgs": "-o tokenize -t 40"
+    },
+    "Index 50": {
+      "commandName": "Project",
+      "commandLineArgs": "-o tokenize -t 50"
+    }
+  }
+}
