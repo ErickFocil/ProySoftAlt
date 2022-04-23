@@ -77,36 +77,42 @@ namespace ProySoftAlt{
             // Usando solo éste paso se omite los siguientes
             // UnificarTokens(@"C:\CS13309\Tokens\", @"C:\CS13309\", "Tokens.txt", "Posting.txt", @"C:\CS13309\stoplist.txt");
 
-            // Juntar Tokens
-            swArchivo.Start();
-            List<NumRPalabras> palabrasDic = UnificarTokens(@"C:\CS13309\Tokens\");
+            if (accion.Equals("tokenize") || accion.Equals("index") || accion.Equals("Todo"))
+            {
+                // Juntar Tokens
+                swArchivo.Start();
+                List<NumRPalabras> palabrasDic = UnificarTokens(@"C:\CS13309\Tokens\");
 
-            //Ordenar - en desuso ya que en filtros se ordena
-            //palabras.Sort((x,y) => x.p.CompareTo(y.p));
+                //Ordenar - en desuso ya que en filtros se ordena
+                //palabras.Sort((x,y) => x.p.CompareTo(y.p));
 
-            // Ejecutar filtros
-            palabrasDic = Filtrar(palabrasDic, @"C:\CS13309\StopList\stoplist.txt");
+                // Ejecutar filtros
+                palabrasDic = Filtrar(palabrasDic, @"C:\CS13309\StopList\stoplist.txt");
 
-            // Archivo para contador
-            TimeSpan[] tSCArchivos = new TimeSpan[2];
+                // Archivo para contador
+                TimeSpan[] tSCArchivos = new TimeSpan[2];
 
-            // Crear Archivos
-            Hashtable htDic = CrearHTDic(palabrasDic);
-            CrearArchivoTokens(palabrasDic, htDic, @"C:\CS13309\", "Tokens.txt");
-            swArchivo.Stop();
-            tSCArchivos[0] = swArchivo.Elapsed;
+                // Crear Archivos
+                Hashtable htDic = CrearHTDic(palabrasDic);
+                CrearArchivoTokens(palabrasDic, htDic, @"C:\CS13309\", "Tokens.txt");
+                swArchivo.Stop();
+                tSCArchivos[0] = swArchivo.Elapsed;
 
-            swArchivo.Start();
-            CrearArchivoPosting(palabrasDic, htDic, @"C:\CS13309\", "Posting.txt");
-            swArchivo.Stop();
-            tSCArchivos[1] = swArchivo.Elapsed;
+                if (accion.Equals("index") || accion.Equals("Todo"))
+                {
+                    swArchivo.Start();
+                    CrearArchivoPosting(palabrasDic, htDic, @"C:\CS13309\", "Posting.txt");
+                    swArchivo.Stop();
+                    tSCArchivos[1] = swArchivo.Elapsed;
+                }
 
+                mTodo += "Milisegundos de creación de Token: " + tSCArchivos[0].TotalMilliseconds + "\n" +
+                    "Milisegundos de creación Tokens y de Posting: " + tSCArchivos[1].TotalMilliseconds + "\n";
+            }
 
             swTodo.Stop();
             TimeSpan swTodoE = swTodo.Elapsed;
-            mTodo += "Milisegundos de creación de Token: " + tSCArchivos[0].TotalMilliseconds + "\n" +
-                "Milisegundos de creación Tokens y de Posting: " + tSCArchivos[1].TotalMilliseconds + "\n" +
-                "Tiempo total de ejecución: " + swTodoE.TotalSeconds;
+            mTodo += "Tiempo total de ejecución: " + swTodoE.TotalSeconds;
             // Log End
             String logD = @"C:\CS13309\aE_2703119.txt";
             FileStream log = File.Create(logD); log.Close();
@@ -123,7 +129,7 @@ namespace ProySoftAlt{
 
             {
                 htR.Add("-t", -1);  argsList.Add("-t");
-                htR.Add("-o", ">F<"); argsList.Add("-o");
+                htR.Add("-o", "Todo"); argsList.Add("-o");
             }
 
             // Análisis de los argumentos
