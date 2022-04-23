@@ -25,23 +25,23 @@
     },
     "Index 10": {
       "commandName": "Project",
-      "commandLineArgs": "-o tokenize -t 10"
+      "commandLineArgs": "-o index -t 10"
     },
     "Index 20": {
       "commandName": "Project",
-      "commandLineArgs": "-o tokenize -t 20"
+      "commandLineArgs": "-o index -t 20"
     },
     "Index 30": {
       "commandName": "Project",
-      "commandLineArgs": "-o tokenize -t 30"
+      "commandLineArgs": "-o index -t 30"
     },
     "Index 40": {
       "commandName": "Project",
-      "commandLineArgs": "-o tokenize -t 40"
+      "commandLineArgs": "-o index -t 40"
     },
     "Index 50": {
       "commandName": "Project",
-      "commandLineArgs": "-o tokenize -t 50"
+      "commandLineArgs": "-o index -t 50"
     }
   }
 }
