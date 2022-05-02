@@ -87,7 +87,6 @@ namespace ProySoftAlt{
             if (accion.Equals("tokenize") || accion.Equals("index") || accion.Equals("Todo"))
             {
                 // Juntar Tokens
-                swArchivo.Start();
                 List<NumRPalabras> palabrasDic = UnificarTokens(@"C:\CS13309\Tokens\");
 
                 // Ordenar para aplicar filtros
@@ -96,32 +95,19 @@ namespace ProySoftAlt{
                 // Ejecutar filtros
                 palabrasDic = Filtrar(palabrasDic, @"C:\CS13309\StopList\stoplist.txt");
 
-                // Archivo para contador
-                TimeSpan[] tSCArchivos = new TimeSpan[2];
-
                 // Crear Archivos
                 Hashtable htDic = CrearHTDic(palabrasDic);
                 CrearArchivoTokens(htDic, @"C:\CS13309\", "Tokens.txt");
-                swArchivo.Stop();
-                tSCArchivos[0] = swArchivo.Elapsed;
 
                 if (accion.Equals("index") || accion.Equals("Todo"))
-                {
-                    swArchivo.Start();
                     CrearArchivoPosting(palabrasDic, dicArchivos, htDic, @"C:\CS13309\", "Posting.txt");
-                    swArchivo.Stop();
-                    tSCArchivos[1] = swArchivo.Elapsed;
-                }
-
-                mTodo += "Milisegundos de creación de Token: " + tSCArchivos[0].TotalMilliseconds + "\n" +
-                    "Milisegundos de creación Tokens y de Posting: " + tSCArchivos[1].TotalMilliseconds + "\n";
             }
 
             swTodo.Stop();
             TimeSpan swTodoE = swTodo.Elapsed;
             mTodo += "Tiempo total de ejecución: " + swTodoE.TotalSeconds;
             // Log End
-            String logD = @"C:\CS13309\aE_2703119.txt";
+            String logD = @"C:\CS13309\aF4_2703119.txt";
             FileStream log = File.Create(logD); log.Close();
             StreamWriter swLog = new StreamWriter(logD);
             swLog.Write(mTodo);
