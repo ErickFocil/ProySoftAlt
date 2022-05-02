@@ -288,10 +288,7 @@ namespace ProySoftAlt{
             StreamWriter sw = new StreamWriter(direcTN);
 
             foreach (var p in palabrasO)
-            {
-                
                 sw.WriteLine(p.Palabra + " " + p.Cantidad);
-            }
             sw.Close();
         }
 
@@ -394,11 +391,21 @@ namespace ProySoftAlt{
             foreach (FileInfo fi in di.GetFiles("*.html"))
             {
                 StreamReader sr = new StreamReader(fi.FullName);
+                Hashtable palabrasHT = new Hashtable();
                 string? line;
                 while ((line = sr.ReadLine()) != null)
                 {
                     string[] split = line.Split(" ");
                     palabras.Add(new NumRPalabras(split[0], Int32.Parse(split[1])) { archivo = fi.Name });
+
+                    // Test HastTable
+                    /*
+                    if (!palabrasHT.ContainsKey(split[0]))
+                    {
+                        List<String> list = new List<String>();
+                        list.Add(fi.Name);
+                        palabrasHT.Add(split[0], );
+                    }*/
                 }
                 sr.Close();
             }
@@ -581,6 +588,16 @@ namespace ProySoftAlt{
         public int id;
         public int c;
         public string archivo;
-        public NumRPalabras(string p, int id) { this.p = p; this.id = id; }
+        public NumRPalabras(string p, int id)
+        {
+            this.p = p;
+            this.id = id;
+        }
+
+        public NumRPalabras(int id, string archivo)
+        {
+            this.archivo = archivo;
+            this.id = id;
+        }
     }
 }
