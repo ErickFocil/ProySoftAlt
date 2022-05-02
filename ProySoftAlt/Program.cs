@@ -101,14 +101,14 @@ namespace ProySoftAlt{
 
                 // Crear Archivos
                 Hashtable htDic = CrearHTDic(palabrasDic);
-                CrearArchivoTokens(palabrasDic, htDic, @"C:\CS13309\", "Tokens.txt");
+                CrearArchivoTokens(htDic, @"C:\CS13309\", "Tokens.txt");
                 swArchivo.Stop();
                 tSCArchivos[0] = swArchivo.Elapsed;
 
                 if (accion.Equals("index") || accion.Equals("Todo"))
                 {
                     swArchivo.Start();
-                    CrearArchivoPosting(palabrasDic, htDic, @"C:\CS13309\", "Posting.txt");
+                    CrearArchivoPosting(palabrasDic, dicArchivos, htDic, @"C:\CS13309\", "Posting.txt");
                     swArchivo.Stop();
                     tSCArchivos[1] = swArchivo.Elapsed;
                 }
@@ -491,7 +491,7 @@ namespace ProySoftAlt{
             return htDic;
         }
 
-        static void CrearArchivoTokens(List<NumRPalabras> palabras, Hashtable htDic, string dirN, string fnToken)
+        static void CrearArchivoTokens(Hashtable htDic, string dirN, string fnToken)
         {
             // Crear archivo
             string direcTN = dirN + fnToken;
@@ -505,11 +505,12 @@ namespace ProySoftAlt{
                 dicT.Add(new NumRPalabras(d, ((NumRPalabras)htDic[d]).id) { c = ((NumRPalabras)htDic[d]).c });
 
             dicT.Sort((x, y) => x.p.CompareTo(y.p));
-            foreach (NumRPalabras d in dicT) sw.WriteLine(d.p + ";" + d.id + ";" + d.c);
+            foreach (NumRPalabras d in dicT)
+                sw.WriteLine(d.p + ";" + d.id + ";" + d.c);
             sw.Close();
         }
 
-        static void CrearArchivoPosting(List<NumRPalabras> palabras, Hashtable htDic, string dirN, string fnPosting)
+        static void CrearArchivoPosting(List<NumRPalabras> palabras, List<String> dicP, Hashtable htDic, string dirN, string fnPosting)
         {
             // Crear archivo
             string direcTNP = dirN + fnPosting;
@@ -517,7 +518,16 @@ namespace ProySoftAlt{
             StreamWriter swP = new StreamWriter(direcTNP);
 
             foreach (NumRPalabras d in palabras)
-                swP.WriteLine(d.archivo + ";" + tfidf(d.id, ((NumRPalabras)htDic[d.p]).id).ToString("N4"));
+            {
+                int id = 0;
+                for (int i = 0; i < dicP.Count; i++)
+                    if (dicP[i].Equals(d.archivo))
+                    {
+                        id = i+1;
+                        break;
+                    }
+                swP.WriteLine(id + ";" + tfidf(d.id, ((NumRPalabras)htDic[d.p]).id).ToString("N4"));
+            }
             //swP.WriteLine(d.archivo + ";" + d.id);
             swP.Close();
         }
