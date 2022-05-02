@@ -83,8 +83,8 @@ namespace ProySoftAlt{
                 swArchivo.Start();
                 List<NumRPalabras> palabrasDic = UnificarTokens(@"C:\CS13309\Tokens\");
 
-                //Ordenar - en desuso ya que en filtros se ordena
-                //palabras.Sort((x,y) => x.p.CompareTo(y.p));
+                // Ordenar para aplicar filtros
+                palabrasDic.Sort((x, y) => x.p.CompareTo(y.p));
 
                 // Ejecutar filtros
                 palabrasDic = Filtrar(palabrasDic, @"C:\CS13309\StopList\stoplist.txt");
@@ -500,8 +500,8 @@ namespace ProySoftAlt{
 
         static List<NumRPalabras> Filtrar(List<NumRPalabras> palabras, string stoplist)
         {
-            // Ordeno las palabras
-            palabras.Sort((x, y) => x.p.CompareTo(y.p));
+            // Ordenar - desactivado ya que se ordena antes del metodo
+            //palabras.Sort((x, y) => x.p.CompareTo(y.p));
             
             // Inicializar las palabras a omitir
             StreamReader srSL = new StreamReader(stoplist);
