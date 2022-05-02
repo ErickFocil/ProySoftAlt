@@ -45,8 +45,12 @@ namespace ProySoftAlt{
             }
             int contL = 0;
 
+            List<String> dicArchivos = new List<String>();
+
             foreach (var file in di.GetFiles("*.html"))
             {
+                dicArchivos.Add(file.Name);
+
                 swArchivo.Start();
 
                 QuitarEtiquetas(@"C:\CS13309\FilesSinEtiquetas\", file);
@@ -71,6 +75,9 @@ namespace ProySoftAlt{
                     if (contL >= limite) break;
                 }
             }
+
+            // Crear archivo diccionario de los archivos iniciales
+            CrearDiccionarioArchivos(dicArchivos, @"C:\CS13309\Diccionario.txt");
 
             /** Trabajando solo con 4 elementos **/
             // Tokenizar
@@ -183,6 +190,16 @@ namespace ProySoftAlt{
                 }
             }
             return htR;
+        }
+
+        static void CrearDiccionarioArchivos(List<String> dic, String dir)
+        {
+            FileStream fs = File.Create(dir); fs.Close();
+            StreamWriter sw = new StreamWriter(dir);
+
+            for(int i = 0; i < dic.Count; i++)
+                sw.WriteLine((i+1) + " " + dic[i]);
+            sw.Close();
         }
 
         static void LimpiarDirectorios(string[] dic)
