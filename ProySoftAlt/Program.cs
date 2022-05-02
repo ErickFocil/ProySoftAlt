@@ -93,14 +93,12 @@ namespace ProySoftAlt{
                 palabrasDic.Sort((x, y) => x.p.CompareTo(y.p));
 
                 // Ejecutar filtros
+                List<NumRPalabras> palabrasDicSinSL = Filtrar(palabrasDic, @"C:\CS13309\StopList\stoplist.txt", false);
                 palabrasDic = Filtrar(palabrasDic, @"C:\CS13309\StopList\stoplist.txt");
 
                 // Crear Archivos
-                Hashtable htDic = CrearHTDic(palabrasDic);
-                CrearArchivoTokens(htDic, @"C:\CS13309\", "Tokens.txt");
-
-                if (accion.Equals("index") || accion.Equals("Todo"))
-                    CrearArchivoPosting(palabrasDic, dicArchivos, htDic, @"C:\CS13309\", "Posting.txt");
+                CrearArchivosTP(palabrasDic, dicArchivos, accion);
+                CrearArchivosTP(palabrasDicSinSL, dicArchivos, accion,"_sinStopList");
             }
 
             swTodo.Stop();
@@ -477,6 +475,15 @@ namespace ProySoftAlt{
             return htDic;
         }
 
+        static void CrearArchivosTP(List<NumRPalabras> palabrasDic, List<String> dicArchivos, string accion, string SinSL = "")
+        {
+            Hashtable htDic = CrearHTDic(palabrasDic);
+            CrearArchivoTokens(htDic, @"C:\CS13309\", "Tokens"+ SinSL + ".txt");
+
+            if (accion.Equals("index") || accion.Equals("Todo"))
+                CrearArchivoPosting(palabrasDic, dicArchivos, htDic, @"C:\CS13309\", "Posting" + SinSL + ".txt");
+        }
+
         static void CrearArchivoTokens(Hashtable htDic, string dirN, string fnToken)
         {
             // Crear archivo
@@ -518,12 +525,13 @@ namespace ProySoftAlt{
             swP.Close();
         }
 
-        static List<NumRPalabras> Filtrar(List<NumRPalabras> palabras, string stoplist)
+        static List<NumRPalabras> Filtrar(List<NumRPalabras> palabras, string stoplist, bool eStopList = true)
         {
             // Ordenar - desactivado ya que se ordena antes del metodo
             //palabras.Sort((x, y) => x.p.CompareTo(y.p));
             
             // Inicializar las palabras a omitir
+
             StreamReader srSL = new StreamReader(stoplist);
             List<string> palabrasSL = new List<string>();
             var line = "";
@@ -539,21 +547,24 @@ namespace ProySoftAlt{
 
             // Asigno la lista temporal al principal y reseteo la lista temporal
             palabras = palabrasT;
-            palabrasT = new List<NumRPalabras>();
 
             // Filtrar por palabras a excluir
-            foreach (NumRPalabras p in palabras)
+            if (eStopList)
             {
-                bool filtrar = false;
-                foreach (string ps in palabrasSL)
+                palabrasT = new List<NumRPalabras>();
+                foreach (NumRPalabras p in palabras)
                 {
-                    if (p.p.Equals(ps))
+                    bool filtrar = false;
+                    foreach (string ps in palabrasSL)
                     {
-                        filtrar = true;
-                        break;
+                        if (p.p.Equals(ps))
+                        {
+                            filtrar = true;
+                            break;
+                        }
                     }
+                    if (!filtrar) palabrasT.Add(p);
                 }
-                if (!filtrar) palabrasT.Add(p);
             }
             // Asigno la lista temporal al principal y reseteo la lista temporal
             palabras = palabrasT;
